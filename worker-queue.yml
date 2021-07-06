@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: EC2 instance and security group for the Valohai Worker Queue
+
+Parameters: 
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+
+  Subnet:
+    Type: AWS::EC2::Subnet::Id
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+  WorkersSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: valohai-sg-queue
+      GroupDescription: Security group for the Valohai Worker Queue
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: for acme tooling (certificate for machine)
+        - IpProtocol: tcp
+          FromPort: 63790
+          ToPort: 63790
+          CidrIp: 34.248.245.191/32
+          Description: for Redis over TLS from app.valohai.com
+        - IpProtocol: tcp
+          FromPort: 63790
+          ToPort: 63790
+          SourceSecurityGroupId: !Ref WorkersSecurityGroup
+          Description: for Redis over TLS from workers
+      Tags:
+        - Key: Name
+          Value: valohai-sg-queue
+
+  WorkerQueue:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref KeyPair
+      ImageId: ami-0a8e758f5e873d1c1
+      InstanceType: t3.medium
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      SubnetId: !Ref Subnet
+      Tags:
+        - Key: Name
+          Value: valohai-i-queue
+
+  ElasticIp:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref WorkerQueue
+
+Outputs:
+  PrivateIp:
+    Value: !GetAtt WorkerQueue.PrivateIp
+
+  PublicIp:
+    Value: !GetAtt WorkerQueue.PublicIp

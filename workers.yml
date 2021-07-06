@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Autoscaling IAM roles and security group for Valohai workers
+
+Parameters:
+  AssumeRoleARN:
+    Type: String
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  WorkerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ValohaiWorkerRole
+      AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":["ec2.amazonaws.com"]},"Action":["sts:AssumeRole"]}]}
+
+  WorkerPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ValohaiWorkerPolicy
+      Roles:
+        - !Ref WorkerRole
+      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"1","Effect":"Allow","Action":"autoscaling:SetInstanceProtection","Resource":"*"},{"Sid":"2","Effect":"Allow","Action":"ec2:DescribeInstances","Resource":"*"}]}
+
+  ValohaiMasterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ValohaiMaster
+      AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":{"Ref":AssumeRoleARN}},"Action":"sts:AssumeRole","Condition":{}}]}
+
+  ValohaiMasterPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ValohaiMasterPolicy
+      Roles:
+        - !Ref ValohaiMasterRole
+      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"2","Effect":"Allow","Action":["ec2:DescribeInstances","ec2:DescribeVpcs","ec2:DescribeKeyPairs","ec2:DescribeImages","ec2:DescribeSecurityGroups","ec2:DescribeSubnets","ec2:DescribeInstanceTypes","ec2:DescribeLaunchTemplates","ec2:DescribeLaunchTemplateVersions","ec2:CreateTags","autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeScalingActivities"],"Resource":"*"},{"Sid":"AllowUpdatingSpotLaunchTemplates","Effect":"Allow","Action":["ec2:CreateLaunchTemplate","ec2:CreateLaunchTemplateVersion","ec2:ModifyLaunchTemplate","ec2:RunInstances","autoscaling:UpdateAutoScalingGroup","autoscaling:CreateOrUpdateTags","autoscaling:SetDesiredCapacity","autoscaling:CreateAutoScalingGroup"],"Resource":"*","Condition":{"ForAllValues:StringEquals":{"aws:ResourceTag/Valohai":"1"}}},{"Sid":"ServiceLinkedRole","Effect":"Allow","Action":"iam:CreateServiceLinkedRole","Resource":"arn:aws:iam::*:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"},{"Sid":"4","Effect":"Allow","Action":["iam:PassRole","iam:GetRole"],"Resource":{"Fn::GetAtt":"WorkerRole.Arn"}}]}
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: valohai-sg-workers
+      GroupDescription: Security group for Valohai workers
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: valohai-sg-workers
+
+Outputs:
+  SecurityGroup:
+    Value: !Ref SecurityGroup
+
+  ValohaiMasterRoleArn:
+    Value: !GetAtt ValohaiMasterRole.Arn

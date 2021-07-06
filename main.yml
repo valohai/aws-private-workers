@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Valohai Private Workers resources
+
+Parameters:
+  AssumeRoleARN:
+    Type: String
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+
+Resources: 
+  Network:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+        - Key: valohai
+          Value: "1"
+      TemplateURL: ./network.yml
+
+  Workers:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        AssumeRoleARN: !Ref AssumeRoleARN
+        VPC: !GetAtt Network.Outputs.VPC
+      Tags:
+        - Key: valohai
+          Value: "1"
+      TemplateURL: ./workers.yml
+
+  WorkerQueue:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        KeyPair: !Ref KeyPair
+        Subnet: !GetAtt Network.Outputs.Subnet1
+        VPC: !GetAtt Network.Outputs.VPC
+        WorkersSecurityGroup: !GetAtt Workers.Outputs.SecurityGroup
+      Tags:
+        - Key: valohai
+          Value: "1"
+      TemplateURL: ./worker-queue.yml
+
+Outputs:
+  KeyPair:
+    Value: !Ref KeyPair
+    Description: Key pair name
+
+  PrivateIp:
+    Value: !GetAtt WorkerQueue.Outputs.PrivateIp
+    Description: Worker Queue instance private IP address
+
+  PublicIp:
+    Value: !GetAtt WorkerQueue.Outputs.PublicIp
+    Description: Worker Queue instance public IP address
+
+  Region:
+    Value: !Ref AWS::Region
+
+  ValohaiMasterRole:
+    Value: !GetAtt Workers.Outputs.ValohaiMasterRoleArn
+    Description: ValohaiMasterRole ARN
+
+  VPC:
+    Value: !GetAtt Network.Outputs.VPC
+    Description: VPC ID
