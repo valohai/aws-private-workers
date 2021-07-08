@@ -2,6 +2,32 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Description: Basic network for Valohai resources
 
+Parameters:
+  AZs:
+    Description: Amount of availability zones in this region, i.e. amount of subnets to create
+    Type: Number
+    Default: 2
+
+Conditions:
+  CreateSixSubnets: !Equals
+    - !Ref AZs
+    - 6
+  CreateFiveSubnets: !Or
+    - !Condition CreateSixSubnets
+    - !Equals
+      - !Ref AZs
+      - 5
+  CreateFourSubnets: !Or
+    - !Condition CreateFiveSubnets
+    - !Equals
+      - !Ref AZs
+      - 4
+  CreateThreeSubnets: !Or
+    - !Condition CreateFourSubnets
+    - !Equals
+      - !Ref AZs
+      - 3
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -10,36 +36,6 @@ Resources:
       Tags:
         - Key: Name
           Value: valohai-vpc
-
-  Subnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: !Sub "${AWS::Region}a"
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.0.0/20
-      Tags:
-        - Key: Name
-          Value: valohai-subnet-1
-
-  Subnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: !Sub "${AWS::Region}b"
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.16.0/20
-      Tags:
-        - Key: Name
-          Value: valohai-subnet-2
-
-  Subnet3:
-    Type: AWS::EC2::Subnet
-    Properties:
-      AvailabilityZone: !Sub "${AWS::Region}c"
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.32.0/20
-      Tags:
-        - Key: Name
-          Value: valohai-subnet-3
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -54,72 +50,79 @@ Resources:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
 
-  RouteTable1:
-    Type: AWS::EC2::RouteTable
+  Subnet1:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: valohai-rt1
+      Parameters:
+        AvailabilityZone: !Sub "${AWS::Region}a"
+        CidrBlock: 10.0.0.0/20
+        InternetGateway: !Ref InternetGateway
+        Number: 1
+        VPC: !Ref VPC
+      TemplateURL: ./subnet.yml
 
-  Route1:
-    Type: AWS::EC2::Route
+  Subnet2:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      RouteTableId: !Ref RouteTable1
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
+      Parameters:
+        AvailabilityZone: !Sub "${AWS::Region}b"
+        CidrBlock: 10.0.16.0/20
+        InternetGateway: !Ref InternetGateway
+        Number: 2
+        VPC: !Ref VPC
+      TemplateURL: ./subnet.yml
 
-  RouteTableAssociation1:
-    Type: AWS::EC2::SubnetRouteTableAssociation
+  Subnet3:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateThreeSubnets
     Properties:
-      SubnetId: !Ref Subnet1
-      RouteTableId: !Ref RouteTable1
+      Parameters:
+        AvailabilityZone: !Sub "${AWS::Region}c"
+        CidrBlock: 10.0.32.0/20
+        InternetGateway: !Ref InternetGateway
+        Number: 3
+        VPC: !Ref VPC
+      TemplateURL: ./subnet.yml
+  
+  Subnet4:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateFourSubnets
+    Properties:
+      Parameters:
+        AvailabilityZone: !Sub "${AWS::Region}d"
+        CidrBlock: 10.0.48.0/20
+        InternetGateway: !Ref InternetGateway
+        Number: 4
+        VPC: !Ref VPC
+      TemplateURL: ./subnet.yml
+  
+  Subnet5:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateFiveSubnets
+    Properties:
+      Parameters:
+        AvailabilityZone: !Sub "${AWS::Region}e"
+        CidrBlock: 10.0.64.0/20
+        InternetGateway: !Ref InternetGateway
+        Number: 5
+        VPC: !Ref VPC
+      TemplateURL: ./subnet.yml
 
-  RouteTable2:
-    Type: AWS::EC2::RouteTable
+  Subnet6:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateSixSubnets
     Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: valohai-rt2
-
-  Route2:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref RouteTable2
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-
-  RouteTableAssociation2:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref Subnet2
-      RouteTableId: !Ref RouteTable2
-
-  RouteTable3:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: valohai-rt3
-
-  Route3:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref RouteTable3
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-
-  RouteTableAssociation3:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref Subnet3
-      RouteTableId: !Ref RouteTable3
+      Parameters:
+        AvailabilityZone: !Sub "${AWS::Region}f"
+        CidrBlock: 10.0.80.0/20
+        InternetGateway: !Ref InternetGateway
+        Number: 6
+        VPC: !Ref VPC
+      TemplateURL: ./subnet.yml
 
 Outputs:
   Subnet1:
-    Value: !Ref Subnet1
+    Value: !GetAtt Subnet1.Outputs.Subnet
 
   VPC:
     Value: !Ref VPC
