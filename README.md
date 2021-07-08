@@ -4,11 +4,13 @@ This repository contains a CloudFormation template to deploy the resources requi
 
 There are five templates in total:
 
+```
 main.yml
 ├── network.yml
 |   └── subnet.yml
 ├── worker-queue.yml
 └── workers.yml
+```
 
 These templates must be packaged in order to be deployed by customers.
 
