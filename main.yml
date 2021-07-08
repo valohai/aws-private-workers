@@ -12,38 +12,55 @@ Mappings:
   RegionMap:
     ap-northeast-1:
       AZs: 3
+      ImageId: ami-0df99b3a8349462c6
     ap-northeast-2:
       AZs: 4
+      ImageId: ami-04876f29fd3a5e8ba
     ap-northeast-3:
       AZs: 3
+      ImageId: ami-0001d1dd884af8872
     ap-south-1:
       AZs: 3
+      ImageId: ami-0c1a7f89451184c8b
     ap-southeast-1:
       AZs: 3
+      ImageId: ami-0d058fe428540cd89
     ap-southeast-2:
       AZs: 3
+      ImageId: ami-0567f647e75c7bc05
     ca-central-1:
       AZs: 3
+      ImageId: ami-0801628222e2e96d6
     eu-central-1:
       AZs: 3
+      ImageId: ami-05f7491af5eef733a
     eu-west-1:
       AZs: 3
+      ImageId: ami-0a8e758f5e873d1c1
     eu-west-2:
       AZs: 3
+      ImageId: ami-0194c3e07668a7e36
     eu-west-3:
       AZs: 3
+      ImageId: ami-0f7cd40eac2214b37
     eu-north-1:
       AZs: 3
+      ImageId: ami-0ff338189efb7ed37
     sa-east-1:
       AZs: 3
+      ImageId: ami-054a31f1b3bf90920
     us-east-1:
       AZs: 6
+      ImageId: ami-09e67e426f25ce0d7
     us-east-2:
       AZs: 3
+      ImageId: ami-00399ec92321828f5
     us-west-1:
       AZs: 2
+      ImageId: ami-0d382e80be7ffdae5
     us-west-2:
       AZs: 4
+      ImageId: ami-03d5c68bab01f3496
 
 Resources: 
   Network:
@@ -71,6 +88,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
+        ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
         KeyPair: !Ref KeyPair
         Subnet: !GetAtt Network.Outputs.Subnet1
         VPC: !GetAtt Network.Outputs.VPC

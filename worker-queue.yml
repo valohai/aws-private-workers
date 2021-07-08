@@ -2,7 +2,10 @@ AWSTemplateFormatVersion: 2010-09-09
 
 Description: EC2 instance and security group for the Valohai Worker Queue
 
-Parameters: 
+Parameters:
+  ImageId:
+    Type: AWS::EC2::Image::Id
+
   KeyPair:
     Type: AWS::EC2::KeyPair::KeyName
 
@@ -46,7 +49,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       KeyName: !Ref KeyPair
-      ImageId: ami-0a8e758f5e873d1c1
+      ImageId: !Ref ImageId
       InstanceType: t3.medium
       SecurityGroupIds:
         - !Ref SecurityGroup
