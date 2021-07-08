@@ -2,12 +2,13 @@
 
 This repository contains a CloudFormation template to deploy the resources required by a Valohai Private Workers setup in AWS.
 
-There are four templates in total:
+There are five templates in total:
 
-- main.yml
-  └─ network.yml
-  └─ worker-queue.yml
-  └─ workers.yml
+main.yml
+├── network.yml
+|   └── subnet.yml
+├── worker-queue.yml
+└── workers.yml
 
 These templates must be packaged in order to be deployed by customers.
 
@@ -44,18 +45,12 @@ aws cloudformation deploy --template-file valohai.yml --parameter-overrides Assu
 
 ## Limitations
 
-1) The CloudFormation template has been hard coded to work with regions that contain three or more availability zones.
+1) A Key pair must be manually created in the AWS region of choice before running the template.
 
-If there are less than three availability zones, the template fails.
-
-If there are more than three availability zones, the template still only creates subnets for three zones a-c.
-
-2) A Key pair must be manually created in the AWS region of choice before running the template.
-
-3) The CloudFormation template does not create a rule for SSH in the `valohai-sq-queue` security group. This needs to be added to be able to SSH in and set up the Worker Queue.
+2) The CloudFormation template does not create a rule for SSH in the `valohai-sq-queue` security group. This needs to be added to be able to SSH in and set up the Worker Queue.
 
 Depending on who does the Worker Queue installation, this rule can allow a customer IP or the Valohai `BastionHost` IP.
 
-4) The `aws package...` command uploads the nested templates into the defined S3 bucket. If this bucket is private, those files are not available from all AWS accounts.
+3) The `aws package...` command uploads the nested templates into the defined S3 bucket. If this bucket is private, those files are not available from all AWS accounts.
 
 Therefore we need to consider what's the best way to publish the packaged main and nested templates to the customers. Possibly they could all be public in GitHub?

@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Subnet with a route table
+
+Parameters:
+  AvailabilityZone:
+    Type: String
+  CidrBlock:
+    Type: String
+  InternetGateway:
+    Type: String
+  Number:
+    Type: Number
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+Resources: 
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      VpcId: !Ref VPC
+      CidrBlock: !Ref CidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub "valohai-subnet${Number}"
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "valohai-rt${Number}"
+
+  Route:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet
+      RouteTableId: !Ref RouteTable
+
+Outputs:
+  Subnet:
+    Value: !Ref Subnet
