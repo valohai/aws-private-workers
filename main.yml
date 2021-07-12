@@ -10,6 +10,12 @@ Parameters:
 
 Mappings:
   RegionMap:
+    af-south-1:
+      AZs: 3
+      ImageId: ami-08a4b40f2fe1e4b35
+    ap-east-1:
+      AZs: 3
+      ImageId: ami-0b215afe809665ae5
     ap-northeast-1:
       AZs: 3
       ImageId: ami-0df99b3a8349462c6
@@ -34,6 +40,9 @@ Mappings:
     eu-central-1:
       AZs: 3
       ImageId: ami-05f7491af5eef733a
+    eu-south-1:
+      AZs: 3
+      ImageId: ami-018f430e4f5375e69
     eu-west-1:
       AZs: 3
       ImageId: ami-0a8e758f5e873d1c1
@@ -46,6 +55,9 @@ Mappings:
     eu-north-1:
       AZs: 3
       ImageId: ami-0ff338189efb7ed37
+    me-south-1:
+      AZs: 3
+      ImageId: ami-0eddb8cfbd6a5f657
     sa-east-1:
       AZs: 3
       ImageId: ami-054a31f1b3bf90920
