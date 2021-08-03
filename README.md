@@ -14,16 +14,11 @@ main.yml
 
 These templates must be packaged in order to be deployed by customers.
 
-## Private Workers Setup
+## Deploy Current Version
 
-1. Valohai: Create the AssumeRole (`valohai-customer-*`) in our AWS
-2. Customer: Create the Key pair for the Worker Queue and Workers
-3. Customer: Deploy the packaged CloudFormation template (requires AssumeRole ARN and Key pair name)
-4. Valohai: Create the `*.vqueue.net` address for the Worker Queue instance (requires CloudFormation output PublicIp)
-5. Customer: Setup the [Worker Queue](https://github.com/valohai/worker-queue) on the instance
-6. Valohai: Run [prep](https://github.com/valohai/prep/) to setup environment types (requires CloudFormation outputs)
+The current version of this CloudFormation template can be deployed from https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/aws-private-workers.yml.
 
-## Packaging and Deploying
+## Package and Deploy New Version
 
 Prerequirements:
 * AWS command-line client
@@ -44,15 +39,3 @@ aws cloudformation package --template-file main.yml --output-template valohai.ym
 # or do it via the AWS Management Console
 aws cloudformation deploy --template-file valohai.yml --parameter-overrides AssumeRoleARN=ASSUMEROLE_ARN KeyPair=KEYPAIR_NAME --capabilities CAPABILITY_NAMED_IAM --stack-name Valohai
 ```
-
-## Limitations
-
-1) A Key pair must be manually created in the AWS region of choice before running the template.
-
-2) The CloudFormation template does not create a rule for SSH in the `valohai-sq-queue` security group. This needs to be added to be able to SSH in and set up the Worker Queue.
-
-Depending on who does the Worker Queue installation, this rule can allow a customer IP or the Valohai `BastionHost` IP.
-
-3) The `aws package...` command uploads the nested templates into the defined S3 bucket. If this bucket is private, those files are not available from all AWS accounts.
-
-Therefore we need to consider what's the best way to publish the packaged main and nested templates to the customers. Possibly they could all be public in GitHub?
