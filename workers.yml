@@ -24,6 +24,13 @@ Resources:
         - !Ref WorkerRole
       PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"1","Effect":"Allow","Action":"autoscaling:SetInstanceProtection","Resource":"*"},{"Sid":"2","Effect":"Allow","Action":"ec2:DescribeInstances","Resource":"*"}]}
 
+  WorkerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: ValohaiWorkerRole
+      Roles:
+        - ValohaiWorkerRole
+
   ValohaiMasterRole:
     Type: AWS::IAM::Role
     Properties:
