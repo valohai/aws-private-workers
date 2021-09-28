@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: EC2 instance and security group for the Valohai Worker Queue
+Description: EC2 instance and security group for the Valohai Worker Queue that handles job queue, states, and short-term logs
 
 Parameters:
   ImageId:
@@ -18,7 +18,22 @@ Parameters:
   WorkersSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
 
+  QueueAddress:
+    Type: String
+
 Resources:
+  ValohaiRedisSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: A password for the redis store running on the Valohai queue
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludePunctuation: True
+      Name: ValohaiRedisSecret
+      Tags:
+        - Key: valohai
+          Value: 1
+
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -41,9 +56,34 @@ Resources:
           ToPort: 63790
           SourceSecurityGroupId: !Ref WorkersSecurityGroup
           Description: for Redis over TLS from workers
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CirdIp: 3.251.38.215/32
+          Description: SSH connection for Valohai maintenance
       Tags:
         - Key: Name
           Value: valohai-sg-queue
+  QueueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ValohaiQueueRole
+      AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":["ec2.amazonaws.com"]},"Action":["sts:AssumeRole"]}]}
+
+  QueuePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ValohaiQueuePolicy
+      Roles:
+        - !Ref QueueRole
+      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"0","Effect":"Allow","Action":["secretsmanager:GetResourcePolicy","secretsmanager:GetSecretValue","secretsmanager:DescribeSecret","secretsmanager:ListSecretVersionIds"],"Resource":"*","Condition":{"StringEquals":{"secretsmanager:ResourceTag/valohai":"1"}}},{"Sid":"1","Effect":"Allow","Action":"secretsmanager:GetRandomPassword","Resource":"*"}]}
+
+  QueueInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: ValohaiQueueInstanceProfile
+      Roles:
+        - ValohaiQueueRole
 
   WorkerQueue:
     Type: AWS::EC2::Instance
@@ -54,10 +94,19 @@ Resources:
       SecurityGroupIds:
         - !Ref SecurityGroup
       SubnetId: !Ref Subnet
+      IamInstanceProfile: !Ref QueueInstanceProfile
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            apt-get update -y
+            apt-get install awscli -y
+            export SECRET=`aws secretsmanager get-secret-value --secret-id ValohaiRedisSecret --query SecretString --output text --region ${AWS::Region}`
+            curl https://raw.githubusercontent.com/valohai/worker-queue/main/host/setup.sh | sudo QUEUE_ADDRESS=${QueueAddress} REDIS_PASSWORD=$SECRET bash
+            unset $SECRET
       Tags:
         - Key: Name
           Value: valohai-i-queue
-
   ElasticIp:
     Type: AWS::EC2::EIP
     Properties:
