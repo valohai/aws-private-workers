@@ -59,7 +59,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CirdIp: 3.251.38.215/32
+          CidrIp: 3.251.38.215/32
           Description: SSH connection for Valohai maintenance
       Tags:
         - Key: Name
