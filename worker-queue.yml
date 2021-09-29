@@ -9,6 +9,9 @@ Parameters:
   KeyPair:
     Type: AWS::EC2::KeyPair::KeyName
 
+  QueueAddress:
+    Type: String
+
   Subnet:
     Type: AWS::EC2::Subnet::Id
 
@@ -17,9 +20,6 @@ Parameters:
 
   WorkersSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
-
-  QueueAddress:
-    Type: String
 
 Resources:
   ValohaiRedisSecret:
@@ -64,6 +64,7 @@ Resources:
       Tags:
         - Key: Name
           Value: valohai-sg-queue
+  
   QueueRole:
     Type: AWS::IAM::Role
     Properties:
@@ -107,6 +108,7 @@ Resources:
       Tags:
         - Key: Name
           Value: valohai-i-queue
+
   ElasticIp:
     Type: AWS::EC2::EIP
     Properties:
