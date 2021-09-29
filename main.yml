@@ -101,6 +101,16 @@ Resources:
           Value: "1"
       TemplateURL: ./workers.yml
 
+  S3Bucket:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        ValohaiMasterRoleArn: !GetAtt Workers.Outputs.ValohaiMasterRoleArn
+      Tags:
+        - Key: valohai
+          Value: "1"
+      TemplateURL: ./s3bucket.yml
+
   WorkerQueue:
     Type: AWS::CloudFormation::Stack
     Properties:
