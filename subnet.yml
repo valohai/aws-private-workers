@@ -23,7 +23,7 @@ Resources:
       CidrBlock: !Ref CidrBlock
       Tags:
         - Key: Name
-          Value: !Sub "valohai-subnet${Number}"
+          Value: !Sub "valohai-subnet-${Number}"
 
   RouteTable:
     Type: AWS::EC2::RouteTable
