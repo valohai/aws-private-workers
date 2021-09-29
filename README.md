@@ -16,6 +16,12 @@ These templates must be packaged in order to be deployed by customers.
 
 ## Deploy Current Version
 
+Before running the template you'll need the following information from Valohai:
+* `AssumeRoleARN` which is Valohai's user that will assume a role in your AWS subscription to manage EC2 instances
+* `QueueAddress` that will be assigned for the queue in your subscription
+
+You will also need to generate a EC2 Key Pair in your AWS Console before creating a stack. This key will be used as the default SSH key for all Valohai created resources.
+
 The current version of this CloudFormation template can be deployed from https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/aws-private-workers.yml.
 
 ## Package and Deploy New Version
@@ -37,5 +43,5 @@ aws cloudformation package --template-file main.yml --output-template valohai.ym
 
 # Deploy the CloudFormation template
 # or do it via the AWS Management Console
-aws cloudformation deploy --template-file valohai.yml --parameter-overrides AssumeRoleARN=ASSUMEROLE_ARN KeyPair=KEYPAIR_NAME --capabilities CAPABILITY_NAMED_IAM --stack-name Valohai
+aws cloudformation deploy --template-file valohai.yml --parameter-overrides AssumeRoleARN=ASSUMEROLE_ARN KeyPair=KEYPAIR_NAME QueueAddress=ADDRESS --capabilities CAPABILITY_NAMED_IAM --stack-name Valohai
 ```
