@@ -1,13 +1,14 @@
-# Valohai Private Workers CloudFormation
+# Valohai Hybrid Setup - CloudFormation
 
-This repository contains a CloudFormation template to deploy the resources required by a Valohai Private Workers setup in AWS.
+This repository contains a CloudFormation template to deploy the resources required by a Valohai Hybrid setup in AWS.
 
-There are five templates in total:
+There are six templates in total:
 
 ```
 main.yml
 ├── network.yml
 |   └── subnet.yml
+├── s3bucket.yml
 ├── worker-queue.yml
 └── workers.yml
 ```
@@ -16,13 +17,13 @@ These templates must be packaged in order to be deployed by customers.
 
 ## Deploy Current Version
 
+The current version of this CloudFormation template can be deployed from https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/aws-private-workers.yml.
+
 Before running the template you'll need the following information from Valohai:
 * `AssumeRoleARN` which is Valohai's user that will assume a role in your AWS subscription to manage EC2 instances
 * `QueueAddress` that will be assigned for the queue in your subscription
 
 You will also need to generate a EC2 Key Pair in your AWS Console before creating a stack. This key will be used as the default SSH key for all Valohai created resources.
-
-The current version of this CloudFormation template can be deployed from https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/aws-private-workers.yml.
 
 ## Package and Deploy New Version
 
