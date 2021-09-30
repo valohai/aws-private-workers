@@ -41,7 +41,7 @@ Resources:
       RoleName: ValohaiS3MultipartRole
       AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS": !Sub '${ValohaiMasterRoleArn}'},"Action":"sts:AssumeRole"}]}
 
-  QueuePolicy:
+  MultiPartPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: ValohaiS3MultipartPolicy
