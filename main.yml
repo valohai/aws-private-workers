@@ -6,9 +6,11 @@ Parameters:
   AssumeRoleARN:
     Type: String
     Description: Name of the Valohai user that will assume the ValohaiMaster role in your account (for autoscaling, and managing the resources).
+
   KeyPair:
     Type: AWS::EC2::KeyPair::KeyName
     Description: KeyPair that will be used for Valohai instances. You'll need to create this under EC2 -> KeyPairs before you can continue.
+
   QueueAddress:
     Type: String
     Description: Address of the Valohai queue that will be setup.

@@ -84,7 +84,7 @@ Resources:
     Properties:
       InstanceProfileName: ValohaiQueueInstanceProfile
       Roles:
-        - ValohaiQueueRole
+        - !Ref QueueRole
 
   WorkerQueue:
     Type: AWS::EC2::Instance

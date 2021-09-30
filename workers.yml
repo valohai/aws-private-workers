@@ -29,7 +29,7 @@ Resources:
     Properties:
       InstanceProfileName: ValohaiWorkerInstanceProfile
       Roles:
-        - ValohaiWorkerRole
+        - !Ref WorkerRole
 
   ValohaiMasterRole:
     Type: AWS::IAM::Role
