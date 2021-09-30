@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: S3 Bucket for Valohai data
+
+Parameters:
+  ValohaiMasterRoleArn:
+    Type: String
+
+Resources:
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub 'valohai-data-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - 'Authorization'
+            AllowedMethods:
+              - GET
+            AllowedOrigins:
+              - '*'
+            Id: AllowGET
+            MaxAge: 3000
+          - AllowedHeaders:
+              - 'Authorization'
+            AllowedMethods:
+              - POST
+            AllowedOrigins:
+              - 'https://app.valohai.com'
+            Id: AllowValohaiPOST
+            MaxAge: 3000
+
+  MultiPartRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ValohaiS3MultipartRole
+      AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS": !Sub '${ValohaiMasterRoleArn}'},"Action":"sts:AssumeRole"}]}
+
+  QueuePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ValohaiS3MultipartPolicy
+      Roles:
+        - !Ref MultiPartRole
+      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"MultipartAccess","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:GetBucketLocation","s3:GetObject","s3:ListBucket","s3:ListBucketMultipartUploads","s3:ListBucketVersions","s3:ListMultipartUploadParts","s3:PutObject"],"Resource":[!Sub 'arn:aws:s3:::valohai-data-${AWS::AccountId}',!Sub 'arn:aws:s3:::valohai-data-${AWS::AccountId}/*']}]}
+
+Outputs:
+  BucketName:
+    Value: !Ref S3Bucket
+    Description: Name of the Amazon S3 bucket for Valohai data
