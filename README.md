@@ -42,7 +42,7 @@ This template is designed to provision the required services in a fresh AWS Acco
   * You'll need to provide a key pair that can be uploaded to your AWS account for connecting to this instance.
   * The machine will also have an Elastic IP attached to it.
 
-* **A secret** stored in your AWS Secrets Manager. The secret `valohai_redis_server` contains the password for Redis that's located inside in your `valohai-queue` instance.
+* **A secret** stored in your AWS Secrets Manager. The secret `ValohaiRedisSecret` contains the password for Redis that's located inside in your `valohai-queue` instance.
 * **S3 Bucket** where Valohai will upload logs from your executions and commit snapshots. All the generated artefacts will be uploaded to this bucket by default.
 * **IAM Roles:**
   * `ValohaiQueueRole` will be attached to the Valohai Queue instance, and allows it to fetch the generated password from your AWS Secrets Manager. Access is restricted to secrets that are tagged `valohai:1`
