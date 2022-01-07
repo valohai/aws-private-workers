@@ -84,6 +84,7 @@ Mappings:
 Resources: 
   Network:
     Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
     Properties:
       Parameters:
         AZs: !FindInMap [ RegionMap, !Ref "AWS::Region", AZs ]
@@ -94,6 +95,7 @@ Resources:
 
   Workers:
     Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
     Properties:
       Parameters:
         AssumeRoleARN: !Ref AssumeRoleARN
@@ -105,6 +107,7 @@ Resources:
 
   S3Bucket:
     Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Retain
     Properties:
       Parameters:
         ValohaiMasterRoleArn: !GetAtt Workers.Outputs.ValohaiMasterRoleArn
@@ -115,6 +118,7 @@ Resources:
 
   WorkerQueue:
     Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
     Properties:
       Parameters:
         ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
