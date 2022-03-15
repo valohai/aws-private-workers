@@ -5,12 +5,13 @@ This repository contains a CloudFormation template to deploy the resources requi
 There are six templates in total:
 
 ```
+iam.yml
+
 main.yml
 ├── network.yml
 |   └── subnet.yml
 ├── s3bucket.yml
-├── worker-queue.yml
-└── workers.yml
+└── worker-queue.yml
 ```
 
 These templates must be packaged in order to be deployed by customers.
