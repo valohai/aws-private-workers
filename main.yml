@@ -3,10 +3,6 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Valohai Private Workers resources
 
 Parameters:
-  AssumeRoleARN:
-    Type: String
-    Description: Name of the Valohai user that will assume the ValohaiMaster role in your account (for autoscaling, and managing the resources).
-
   KeyPair:
     Type: AWS::EC2::KeyPair::KeyName
     Description: KeyPair that will be used for Valohai instances. You'll need to create this under EC2 -> KeyPairs before you can continue.
@@ -14,6 +10,10 @@ Parameters:
   QueueAddress:
     Type: String
     Description: Address of the Valohai queue that will be setup.
+
+  ValohaiMasterRoleARN:
+    Type: String
+    Description: Name of the Valohai Master Role used for autoscaling resources.
 
 Mappings:
   RegionMap:
@@ -93,24 +93,12 @@ Resources:
           Value: "1"
       TemplateURL: ./network.yml
 
-  Workers:
-    Type: AWS::CloudFormation::Stack
-    DeletionPolicy: Delete
-    Properties:
-      Parameters:
-        AssumeRoleARN: !Ref AssumeRoleARN
-        VPC: !GetAtt Network.Outputs.VPC
-      Tags:
-        - Key: valohai
-          Value: "1"
-      TemplateURL: ./workers.yml
-
   S3Bucket:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Retain
     Properties:
       Parameters:
-        ValohaiMasterRoleArn: !GetAtt Workers.Outputs.ValohaiMasterRoleArn
+        ValohaiMasterRoleARN: !Ref ValohaiMasterRoleARN
       Tags:
         - Key: valohai
           Value: "1"
@@ -126,7 +114,7 @@ Resources:
         QueueAddress: !Ref QueueAddress
         Subnet: !GetAtt Network.Outputs.Subnet1
         VPC: !GetAtt Network.Outputs.VPC
-        WorkersSecurityGroup: !GetAtt Workers.Outputs.SecurityGroup
+        WorkersSecurityGroup: !GetAtt Network.Outputs.SecurityGroup
       Tags:
         - Key: valohai
           Value: "1"
@@ -149,7 +137,7 @@ Outputs:
     Value: !Ref AWS::Region
 
   ValohaiMasterRole:
-    Value: !GetAtt Workers.Outputs.ValohaiMasterRoleArn
+    Value: !Ref ValohaiMasterRoleARN
     Description: ValohaiMasterRole ARN
 
   VPC:

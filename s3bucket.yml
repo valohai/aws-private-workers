@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: S3 Bucket for Valohai data
 
 Parameters:
-  ValohaiMasterRoleArn:
+  ValohaiMasterRoleARN:
     Type: String
 
 Resources:
@@ -39,7 +39,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: ValohaiS3MultipartRole
-      AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS": !Sub '${ValohaiMasterRoleArn}'},"Action":"sts:AssumeRole"}]}
+      AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS": !Sub '${ValohaiMasterRoleARN}'},"Action":"sts:AssumeRole"}]}
 
   MultiPartPolicy:
     Type: AWS::IAM::Policy
