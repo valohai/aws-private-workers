@@ -11,6 +11,10 @@ Parameters:
     Type: String
     Description: Address of the Valohai queue that will be setup.
 
+  Suffix:
+    Type: String
+    Description: Unique suffix used with some of the resources, you can for example use the stack name.
+
   ValohaiMasterRoleARN:
     Type: String
     Description: Name of the Valohai Master Role used for autoscaling resources.
@@ -98,6 +102,7 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       Parameters:
+        Suffix: !Ref Suffix
         ValohaiMasterRoleARN: !Ref ValohaiMasterRoleARN
       Tags:
         - Key: valohai
