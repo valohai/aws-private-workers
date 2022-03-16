@@ -18,7 +18,9 @@ These templates must be packaged in order to be deployed by customers.
 
 ## Deploy Current Version
 
-The current version of this CloudFormation template can be deployed from https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/aws-private-workers.yml.
+The current version of these CloudFormation templates can be deployed from:
+1. https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/iam.yml
+2. https://valohai-cfn-templates-public.s3.eu-west-1.amazonaws.com/aws-hybrid-workers.yml
 
 Before running the template you'll need the following information from Valohai:
 * `AssumeRoleARN` is the ARN of the user Valohai will use to assume a role in your AWS subscription to manage EC2 instances.
@@ -65,11 +67,15 @@ Prerequirements:
 # Use the AWS account
 export AWS_PROFILE=PROFILE_NAME
 
-# Package the nested stacks to one YAML file
+# Package the nested stacks
 # if you only want to build a new release version, you can stop after this
-aws cloudformation package --template-file main.yml --output-template valohai.yml --s3-bucket S3_BUCKET
+aws cloudformation package --template-file main.yml --output-template aws-hybrid-workers.yml --s3-bucket S3_BUCKET
+
+# Deploy the IAM CloudFormation template
+# unless you've done it before
+aws cloudformation deploy --template-file iam.yml --parameter-overrides AssumeRoleARN=ASSUMEROLE_ARN --capabilities CAPABILITY_NAMED_IAM --stack-name ValohaiIAM
 
 # Deploy the CloudFormation template
 # or do it via the AWS Management Console
-aws cloudformation deploy --template-file valohai.yml --parameter-overrides AssumeRoleARN=ASSUMEROLE_ARN KeyPair=KEYPAIR_NAME QueueAddress=ADDRESS --capabilities CAPABILITY_NAMED_IAM --stack-name Valohai
+aws cloudformation deploy --template-file aws-hybrid-workers.yml --parameter-overrides KeyPair=KEYPAIR_NAME QueueAddress=ADDRESS Suffix=SUFFIX ValohaiMasterRoleArn=VALOHAIMASTERROLE_ARN --stack-name Valohai
 ```
