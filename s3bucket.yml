@@ -3,6 +3,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: S3 Bucket for Valohai data
 
 Parameters:
+  Suffix:
+    Type: String
+
   ValohaiMasterRoleARN:
     Type: String
 
@@ -10,7 +13,7 @@ Resources:
   S3Bucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Sub 'valohai-data-${AWS::AccountId}'
+      BucketName: !Sub 'valohai-data-${Suffix}'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: True
         BlockPublicPolicy: True
@@ -38,7 +41,7 @@ Resources:
   MultiPartRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ValohaiS3MultipartRole
+      RoleName: !Sub 'ValohaiS3MultipartRole-${Suffix}'
       AssumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS": !Sub '${ValohaiMasterRoleARN}'},"Action":"sts:AssumeRole"}]}
 
   MultiPartPolicy:
@@ -47,7 +50,15 @@ Resources:
       PolicyName: ValohaiS3MultipartPolicy
       Roles:
         - !Ref MultiPartRole
-      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"MultipartAccess","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:GetBucketLocation","s3:GetObject","s3:ListBucket","s3:ListBucketMultipartUploads","s3:ListBucketVersions","s3:ListMultipartUploadParts","s3:PutObject"],"Resource":[!Sub 'arn:aws:s3:::valohai-data-${AWS::AccountId}',!Sub 'arn:aws:s3:::valohai-data-${AWS::AccountId}/*']}]}
+      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"MultipartAccess","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:GetBucketLocation","s3:GetObject","s3:ListBucket","s3:ListBucketMultipartUploads","s3:ListBucketVersions","s3:ListMultipartUploadParts","s3:PutObject"],"Resource":[!Sub 'arn:aws:s3:::valohai-data-${Suffix}',!Sub 'arn:aws:s3:::valohai-data-${Suffix}/*']}]}
+
+  ValohaiMasterS3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub 'ValohaiMasterPolicy-${AWS::StackName}'
+      Roles:
+        - ValohaiMaster
+      PolicyDocument: {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"s3:*","Resource":[!Sub 'arn:aws:s3:::valohai-data-${Suffix}', !Sub 'arn:aws:s3:::valohai-data-${Suffix}/*']}]}
 
 Outputs:
   BucketName:
