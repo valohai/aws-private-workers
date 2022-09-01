@@ -51,31 +51,3 @@ This template is designed to provision the required services in a fresh AWS Acco
   * `ValohaiQueueRole` will be attached to the Valohai Queue instance, and allows it to fetch the generated password from your AWS Secrets Manager. Access is restricted to secrets that are tagged `valohai:1`
   * `ValohaiWorkerRole` is attached to all autoscaled EC2 instances that are launched for machine learning jobs.
   * `ValohaiMaster` is the role that the Valohai service will use to manage autoscaling and EC2 resources. The role is also used to manage the newly provisioned `valohai-data-*` S3 Bucket.
-
-## Package and Deploy New Version of the Template
-
-Follow these steps to deploy a new version of this template.
-
-Prerequirements:
-* AWS command-line client
-* AWS account, configured in the CLI: `aws configure --profile PROFILE_NAME`
-* S3 bucket in the AWS account. We will refer to this as bucket S3_BUCKET
-* KeyPair in the AWS account. We will refer to this as KEYPAIR_NAME
-* AssumeRole in the Valohai AWS account. We will refer to this as ASSUMEROLE_ARN
-
-```bash
-# Use the AWS account
-export AWS_PROFILE=PROFILE_NAME
-
-# Package the nested stacks
-# if you only want to build a new release version, you can stop after this
-aws cloudformation package --template-file main.yml --output-template aws-hybrid-workers.yml --s3-bucket S3_BUCKET
-
-# Deploy the IAM CloudFormation template
-# unless you've done it before
-aws cloudformation deploy --template-file iam.yml --parameter-overrides AssumeRoleARN=ASSUMEROLE_ARN --capabilities CAPABILITY_NAMED_IAM --stack-name ValohaiIAM
-
-# Deploy the CloudFormation template
-# or do it via the AWS Management Console
-aws cloudformation deploy --template-file aws-hybrid-workers.yml --parameter-overrides KeyPair=KEYPAIR_NAME QueueAddress=ADDRESS Suffix=SUFFIX ValohaiMasterRoleArn=VALOHAIMASTERROLE_ARN --stack-name Valohai
-```
