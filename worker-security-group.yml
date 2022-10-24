@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Basic network for Valohai resources
+
+Parameters:
+  VPC:
+    Description: VPC ID
+    Type: String
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: valohai-sg-workers
+      GroupDescription: Security group for Valohai workers
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: valohai-sg-workers
+
+Outputs:
+  SecurityGroup:
+    Value: !Ref SecurityGroup
