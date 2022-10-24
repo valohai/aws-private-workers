@@ -22,12 +22,12 @@ Parameters:
   VpcId:
     Type: String
     Description: OPTIONAL. Provide an existing VPC ID to use with Valohai resources. Leave empty if you want to create a new VPC.
-    Default: ''
+    Default: ""
 
   Subnet:
     Type: String
-    Description: Provide the Subnet ID that should be used for the Valohai Queue instance, if you're using an existing VPC. Leave empty if you want the template to create a new VPC and Subnet.
-    Default: ''
+    Description: OPTIONAL. Provide the Subnet ID that should be used for the Valohai Queue instance, if you're using an existing VPC. Leave empty if you want the template to create a new VPC and Subnet.
+    Default: ""
 
 Conditions:
   CreateVPC: !Equals
@@ -125,7 +125,7 @@ Resources:
           Value: "1"
       TemplateURL: ./s3bucket.yml
 
-  WorkerSG:
+  WorkerSecurityGroup:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
@@ -145,7 +145,7 @@ Resources:
         QueueAddress: !Ref QueueAddress
         Subnet: !If [CreateVPC, !GetAtt Network.Outputs.Subnet1, !Ref Subnet]
         VPC: !If [CreateVPC, !GetAtt Network.Outputs.VPC, !Ref VpcId]
-        WorkersSecurityGroup: !GetAtt WorkerSG.Outputs.SecurityGroup
+        WorkersSecurityGroup: !GetAtt WorkerSecurityGroup.Outputs.SecurityGroup
       Tags:
         - Key: valohai
           Value: "1"
@@ -171,9 +171,9 @@ Outputs:
     Value: !Ref ValohaiMasterRoleARN
     Description: ValohaiMasterRole ARN
   
-  ValohaiWorkerSG:
-    Value: !GetAtt WorkerSG.Outputs.SecurityGroup
-    Description: ValohaiWorkerSG
+  WorkerSecurityGroup:
+    Value: !GetAtt WorkerSecurityGroup.Outputs.SecurityGroup
+    Description: Valohai Security Group ID
 
   VPC:
     Value: !If [CreateVPC, !GetAtt Network.Outputs.VPC, !Ref VpcId]
