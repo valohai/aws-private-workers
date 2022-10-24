@@ -33,6 +33,7 @@ You will also need to generate a EC2 Key Pair in your AWS Console before creatin
 This template is designed to provision the required services in a fresh AWS Account. The following services will be deployed:
 
 * **VPC and Subnets** in the selected region. Valohai will also deploy a Internet Gateway and RouteTables.
+  * You can also specify the IDs of an existing VPC and Subnet that you'd like to deploy the Valohai resources to
 * **Two security groups** for Valohai resources:
   * `valohai-sg-workers` that all the Valohai autoscaled EC2 instances will use.
     * By default it doesn't have ports open. You'll have to open ports to allow for example connecting over SSH to the instances.
