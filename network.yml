@@ -120,20 +120,7 @@ Resources:
         VPC: !Ref VPC
       TemplateURL: ./subnet.yml
 
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: valohai-sg-workers
-      GroupDescription: Security group for Valohai workers
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: valohai-sg-workers
-
 Outputs:
-  SecurityGroup:
-    Value: !Ref SecurityGroup
-
   Subnet1:
     Value: !GetAtt Subnet1.Outputs.Subnet
 
