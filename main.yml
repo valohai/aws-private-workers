@@ -19,6 +19,21 @@ Parameters:
     Type: String
     Description: Name of the Valohai Master Role used for autoscaling resources.
 
+  VpcId:
+    Type: String
+    Description: OPTIONAL. Provide an existing VPC ID to use with Valohai resources. Leave empty if you want to create a new VPC.
+    Default: ''
+
+  Subnet:
+    Type: String
+    Description: Provide the Subnet ID that should be used for the Valohai Queue instance, if you're using an existing VPC. Leave empty if you want the template to create a new VPC and Subnet.
+    Default: ''
+
+Conditions:
+  CreateVPC: !Equals
+    - !Ref VpcId
+    - ""
+
 Mappings:
   RegionMap:
     af-south-1:
@@ -88,6 +103,7 @@ Mappings:
 Resources: 
   Network:
     Type: AWS::CloudFormation::Stack
+    Condition: CreateVPC
     DeletionPolicy: Delete
     Properties:
       Parameters:
@@ -109,6 +125,16 @@ Resources:
           Value: "1"
       TemplateURL: ./s3bucket.yml
 
+  WorkerSG:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VPC: !If [CreateVPC, !GetAtt Network.Outputs.VPC, !Ref VpcId]
+      Tags:
+        - Key: valohai
+          Value: "1"
+      TemplateURL: ./worker-security-group.yml
+
   WorkerQueue:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
@@ -117,9 +143,9 @@ Resources:
         ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
         KeyPair: !Ref KeyPair
         QueueAddress: !Ref QueueAddress
-        Subnet: !GetAtt Network.Outputs.Subnet1
-        VPC: !GetAtt Network.Outputs.VPC
-        WorkersSecurityGroup: !GetAtt Network.Outputs.SecurityGroup
+        Subnet: !If [CreateVPC, !GetAtt Network.Outputs.Subnet1, !Ref Subnet]
+        VPC: !If [CreateVPC, !GetAtt Network.Outputs.VPC, !Ref VpcId]
+        WorkersSecurityGroup: !GetAtt WorkerSG.Outputs.SecurityGroup
       Tags:
         - Key: valohai
           Value: "1"
@@ -144,7 +170,11 @@ Outputs:
   ValohaiMasterRole:
     Value: !Ref ValohaiMasterRoleARN
     Description: ValohaiMasterRole ARN
+  
+  ValohaiWorkerSG:
+    Value: !GetAtt WorkerSG.Outputs.SecurityGroup
+    Description: ValohaiWorkerSG
 
   VPC:
-    Value: !GetAtt Network.Outputs.VPC
+    Value: !If [CreateVPC, !GetAtt Network.Outputs.VPC, !Ref VpcId]
     Description: VPC ID
