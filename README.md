@@ -11,6 +11,7 @@ main.yml
 ├── network.yml
 |   └── subnet.yml
 ├── s3bucket.yml
+└── worker-security-group.yml
 └── worker-queue.yml
 ```
 
